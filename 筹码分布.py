@@ -197,10 +197,10 @@ class ChipDistribution:
 
 
 if __name__ == "__main__":
-    chip_dist = ChipDistribution()
-    chip_dist.get_data()  # 获取数据
-    chip_dist.calc_chip(flag=1, ac=1)  # 计算
-    chip_dist.winner()  # 获利盘
-    chip_dist.cost(90)  # 成本分布
+    cd = ChipDistribution()
+    cd.get_data()  # 获取数据
+    cd.calc_chip(flag=1, ac=1)  # 计算
+    cd.winner()  # 获利盘
+    cd.cost(90)  # 成本分布
 
-    chip_dist.l_winner()
+    cd.l_winner()
