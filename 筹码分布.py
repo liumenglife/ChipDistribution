@@ -35,15 +35,15 @@ class ChipDistribution:
     def calc_triangular_distribution(self, date_t, high_t, low_t, avg_t, vol_t, turnover_rate_t, epsilon, a):
         x = []
 
-        l = (high_t - low_t) / epsilon
-        for i in range(int(l)):
+        mp_difference = (high_t - low_t) / epsilon
+        for i in range(int(mp_difference)):
             x.append(round(low_t + i * epsilon, 2))
 
         length = len(x)
 
         # 计算仅仅今日的筹码分布
-        tmpChip = {}
-        eachV = vol_t / length
+        tmp_chip = {}
+        each_vol = vol_t / length
 
         # 极限法分割去逼近
         for i in x:
@@ -62,16 +62,16 @@ class ChipDistribution:
 
                 s = epsilon * (y1 + y2) / 2
                 s = s * vol_t
-            tmpChip[i] = s
+            tmp_chip[i] = s
 
         for i in self.chip:
             self.chip[i] = self.chip[i] * (1 - turnover_rate_t * a)
 
-        for i in tmpChip:
+        for i in tmp_chip:
             if i in self.chip:
-                self.chip[i] += tmpChip[i] * (turnover_rate_t * a)
+                self.chip[i] += tmp_chip[i] * (turnover_rate_t * a)
             else:
-                self.chip[i] = tmpChip[i] * (turnover_rate_t * a)
+                self.chip[i] = tmp_chip[i] * (turnover_rate_t * a)
         import copy
         self.chip_list[date_t] = copy.deepcopy(self.chip)
 
@@ -202,7 +202,7 @@ class ChipDistribution:
 if __name__ == "__main__":
     cd = ChipDistribution()
     cd.get_data()  # 获取数据
-    cd.calc_chip(flag=1, ac=1)  # 计算
+    cd.calc_chip(flag=1, ac=1)  # 按[三角形分布]和[衰减系数=1,即今日换手率等于前一日被移动的筹码总览]来计算筹码
     cd.winner()  # 获利盘
     cd.cost(90)  # 成本分布
 
