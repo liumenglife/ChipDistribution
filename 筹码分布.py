@@ -12,12 +12,13 @@ class ChipDistribution:
     def get_data(self):
         self.data = pd.read_csv('test.csv')
 
-    def calc_jun(self, date_t, high_t, low_t, vol_t, turnover_rate_t, a, min_d):
+    # 计算平均分布
+    def calc_mean_distribution(self, date_t, high_t, low_t, vol_t, turnover_rate_t, a, epsilon):
 
         x = []
-        l = (high_t - low_t) / min_d
-        for i in range(int(l)):
-            x.append(round(low_t + i * min_d, 2))
+        mp_difference = (high_t - low_t) / epsilon
+        for i in range(int(mp_difference)):
+            x.append(round(low_t + i * epsilon, 2))
         length = len(x)
         each_v = vol_t / length
         for i in self.chip:
@@ -30,12 +31,13 @@ class ChipDistribution:
         import copy
         self.chip_list[date_t] = copy.deepcopy(self.chip)
 
-    def calcuSin(self, date_t, high_t, low_t, avg_t, vol_t, turnover_rate_t, min_d, a):
+    # 计算三角形分布
+    def calc_triangular_distribution(self, date_t, high_t, low_t, avg_t, vol_t, turnover_rate_t, epsilon, a):
         x = []
 
-        l = (high_t - low_t) / min_d
+        l = (high_t - low_t) / epsilon
         for i in range(int(l)):
-            x.append(round(low_t + i * min_d, 2))
+            x.append(round(low_t + i * epsilon, 2))
 
         length = len(x)
 
@@ -46,19 +48,19 @@ class ChipDistribution:
         # 极限法分割去逼近
         for i in x:
             x1 = i
-            x2 = i + min_d
+            x2 = i + epsilon
             h = 2 / (high_t - low_t)
             s = 0
             if i < avg_t:
                 y1 = h / (avg_t - low_t) * (x1 - low_t)
                 y2 = h / (avg_t - low_t) * (x2 - low_t)
-                s = min_d * (y1 + y2) / 2
+                s = epsilon * (y1 + y2) / 2
                 s = s * vol_t
             else:
                 y1 = h / (high_t - avg_t) * (high_t - x1)
                 y2 = h / (high_t - avg_t) * (high_t - x2)
 
-                s = min_d * (y1 + y2) / 2
+                s = epsilon * (y1 + y2) / 2
                 s = s * vol_t
             tmpChip[i] = s
 
@@ -73,11 +75,12 @@ class ChipDistribution:
         import copy
         self.chip_list[date_t] = copy.deepcopy(self.chip)
 
-    def calcu(self, date_t, high_t, low_t, avg_t, vol_t, turnover_rate_t, min_d=0.01, flag=1, ac=1):
+    def calculate(self, date_t, high_t, low_t, avg_t, vol_t, turnover_rate_t, epsilon=1e-2, flag=1, ac=1):
         if flag == 1:
-            self.calcuSin(date_t, high_t, low_t, avg_t, vol_t, turnover_rate_t, a=ac, min_d=min_d)
+            self.calc_triangular_distribution(date_t, high_t, low_t, avg_t, vol_t, turnover_rate_t,
+                                              a=ac, epsilon=epsilon)
         elif flag == 2:
-            self.calc_jun(date_t, high_t, low_t, vol_t, turnover_rate_t, a=ac, min_d=min_d)
+            self.calc_mean_distribution(date_t, high_t, low_t, vol_t, turnover_rate_t, a=ac, epsilon=epsilon)
 
     def calc_chip(self, flag=1, ac=1):  # flag 使用哪个计算方式,    AC 衰减系数
         low = self.data['low']
@@ -98,8 +101,8 @@ class ChipDistribution:
             avg_t = avg[i]
             # print(date[i])
             date_t = date[i]
-            self.calcu(date_t, high_t, low_t, avg_t, vol_t, turnover_rate_t / 100, flag=flag,
-                       ac=ac)  # 东方财富的小数位要注意，兄弟萌。我不除100懵逼了
+            self.calculate(date_t, high_t, low_t, avg_t, vol_t, turnover_rate_t / 100, flag=flag,
+                           ac=ac)  # 东方财富的小数位要注意，兄弟萌。我不除100懵逼了
 
         # 计算winner
 
